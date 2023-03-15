@@ -1,5 +1,6 @@
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
+from config.error_code import *
 
 
 class Kiwoom(QAxWidget):
@@ -23,7 +24,7 @@ class Kiwoom(QAxWidget):
         self.OnEventConnect.connect(self.login_slot)
 
     def login_slot(self, errCode):
-        print(errCode)
+        print(errors(errCode))
 
         self.login_event_loop.exit()
 
