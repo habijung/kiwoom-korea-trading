@@ -9,13 +9,18 @@ class Kiwoom(QAxWidget):
 
         print("Class Kiwoom")
 
-        # Event Loop ###############
+        # Event Loop
         self.login_event_loop = None
         ############################
 
+        # Variables
+        self.account_num = None
+
         self.get_ocx_instance()
         self.event_slots()
+
         self.signal_login_commConnect()
+        self.get_account_info()
 
     def get_ocx_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
@@ -33,3 +38,11 @@ class Kiwoom(QAxWidget):
 
         self.login_event_loop = QEventLoop()
         self.login_event_loop.exec_()
+
+    def get_account_info(self):
+        account_list = self.dynamicCall("GetLoginInfo(String)", "ACCNO")
+        account_num = account_list.split(";")[0]
+
+        print(f"Account: {account_num}")
+
+        return account_num
