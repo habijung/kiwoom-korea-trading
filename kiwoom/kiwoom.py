@@ -11,6 +11,7 @@ class Kiwoom(QAxWidget):
 
         # Event Loop
         self.login_event_loop = None
+        self.defailt_account_info_event_loop = None
         ############################
 
         # Variables
@@ -66,6 +67,10 @@ class Kiwoom(QAxWidget):
             "2000",
         )
 
+        # 요청 후 event loop를 실행해서 TR 요청 데이터가 올 때까지 대기
+        self.detail_account_info_event_loop = QEventLoop()
+        self.detail_account_info_event_loop.exec_()
+
     def trdata_slot(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext):
         """
         TR 요청을 받는 구역
@@ -91,3 +96,6 @@ class Kiwoom(QAxWidget):
                 "출금가능금액",
             )
             print(f"출금가능금액: {int(ok_deposit)}")
+
+            # TR 요청 처리를 했기 때문에 event loop를 종료
+            self.detail_account_info_event_loop.exit()
