@@ -19,6 +19,7 @@ class Kiwoom(QAxWidget):
         self.account_num = None
         self.use_money = 0
         self.use_money_percent = 0.5
+        self.account_stock_dict = {}
 
         self.get_ocx_instance()
         self.event_slots()
@@ -142,5 +143,88 @@ class Kiwoom(QAxWidget):
             )
             total_profit_loss_rate_result = float(total_profit_loss_rate)
             print(f"총수익률(%): {total_profit_loss_rate_result}")
+
+            # 계좌 평가 잔고 내역에서 종목 가져오기
+            rows = self.dynamicCall("GetRepeatCnt(QString, QString)", sTrCode, sRQName)
+            cnt = 0
+
+            for i in range(rows):
+                code = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "종목번호",
+                )
+                code = code.strip()[1:]
+
+                stock_quantity = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "보유수량",
+                )
+                buy_price = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "매입가",
+                )
+                learn_rate = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "수익률(%)",
+                )
+                current_price = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "현재가",
+                )
+                total_chegual_price = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "매입금액",
+                )
+                possible_quantity = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "매매가능수량",
+                )
+
+                if code in self.account_stock_dict:
+                    pass
+                else:
+                    self.account_stock_dict.update({code: {}})
+
+                # string으로 나온 값을 int로 변환
+                code_name = code_name.strip()
+                stock_quantity = int(stock_quantity.strip())
+                buy_price = int(buy_price.strip())
+                learn_rate = float(learn_rate.strip())
+                current_price = int(current_price.strip())
+                total_chegual_price = int(total_chegual_price.strip())
+                possible_quantity = int(possible_quantity.strip())
+
+                self.account_stock_dict[code].update({"종목명": code_name})
+                self.account_stock_dict[code].update({"보유수량": stock_quantity})
+                self.account_stock_dict[code].update({"매입가": buy_price})
+                self.account_stock_dict[code].update({"수익률(%)": learn_rate})
+                self.account_stock_dict[code].update({"현재가": current_price})
+                self.account_stock_dict[code].update({"매입금액": total_chegual_price})
+                self.account_stock_dict[code].update({"매매가능수량": possible_quantity})
+
+                cnt += 1
+
+            print(f"계좌에 가지고 있는 종목: {self.account_stock_dict}")
 
             self.detail_account_info_event_loop_2.exit()
