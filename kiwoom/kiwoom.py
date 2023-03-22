@@ -12,7 +12,7 @@ class Kiwoom(QAxWidget):
         # Event Loop
         self.login_event_loop = None
         self.detail_account_info_event_loop = None
-        self.detail_account_info_event_loop_2 = None
+        self.detail_account_info_event_loop_2 = QEventLoop()
         ############################
 
         # Variables
@@ -77,7 +77,7 @@ class Kiwoom(QAxWidget):
         self.detail_account_info_event_loop.exec_()
 
     def detail_account_mystock(self, sPrevNext="0"):
-        print("계좌평가잔고내역요청")
+        print(f"계좌평가 잔고내역 요청하기 연속 조회 {sPrevNext}")
 
         self.dynamicCall("SetInputValue(String, String)", "계좌번호", self.account_num)
         self.dynamicCall("SetInputValue(String, String)", "비밀번호", "0000")
@@ -91,7 +91,6 @@ class Kiwoom(QAxWidget):
             "2000",
         )
 
-        self.detail_account_info_event_loop_2 = QEventLoop()
         self.detail_account_info_event_loop_2.exec_()
 
     def trdata_slot(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext):
@@ -226,5 +225,10 @@ class Kiwoom(QAxWidget):
                 cnt += 1
 
             print(f"계좌에 가지고 있는 종목: {self.account_stock_dict}")
+            print(f"계좌에 가지고 있는 종목 개수: {cnt}")
 
-            self.detail_account_info_event_loop_2.exit()
+            # 계좌 평가 잔고 내역은 한 페이지에 20개만 조회 가능해서 다음 페이지가 있는지 확인
+            if sPrevNext == "2":
+                self.detail_account_mystock(sPrevNext="2")
+            else:
+                self.detail_account_info_event_loop_2.exit()
