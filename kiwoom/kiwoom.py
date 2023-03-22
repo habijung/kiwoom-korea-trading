@@ -17,6 +17,8 @@ class Kiwoom(QAxWidget):
 
         # Variables
         self.account_num = None
+        self.use_money = 0
+        self.use_money_percent = 0.5
 
         self.get_ocx_instance()
         self.event_slots()
@@ -107,6 +109,10 @@ class Kiwoom(QAxWidget):
                 "GetCommData(String, String, int, String)", sTrCode, sRQName, 0, "예수금"
             )
             print(f"예수금: {int(deposit)}")
+
+            # 예수금을 일정 부분만 사용하도록 설정
+            self.use_money = int(deposit) * self.use_money_percent
+            self.use_money = self.use_money / 4
 
             ok_deposit = self.dynamicCall(
                 "GetCommData(String, String, int, String)",
