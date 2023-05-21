@@ -157,6 +157,13 @@ class Kiwoom(QAxWidget):
                 )
                 code = code.strip()[1:]
 
+                code_name = self.dynamicCall(
+                    "GetCommData(QString, QString, int, QString)",
+                    sTrCode,
+                    sRQName,
+                    i,
+                    "종목명",
+                )
                 stock_quantity = self.dynamicCall(
                     "GetCommData(QString, QString, int, QString)",
                     sTrCode,
