@@ -12,6 +12,7 @@ class Kiwoom(QAxWidget):
         # Event Loop
         self.login_event_loop = None
         self.detail_account_info_event_loop = QEventLoop()
+        self.calculator_event_loop = QEventLoop()
         ############################
 
         # Variables
@@ -356,6 +357,22 @@ class Kiwoom(QAxWidget):
 
             self.detail_account_info_event_loop.exit()
 
+        elif sRQName == "주식일봉차트조회":
+            code = self.dynamicCall(
+                "GetCommData(QString, QString, int, QString)",
+                sTrCode,
+                sRQName,
+                0,
+                "종목코드",
+            )
+            print(f"{code} 일봉 데이터 요청")
+
+            # 이전 데이터가 있으면 계속 조회
+            if sPrevNext == "2":
+                self.day_kiwoom_db(code=code, sPrevNext=sPrevNext)
+            else:
+                self.calculator_event_loop.exit()
+
     def get_code_list_by_market(self, market_code):
         """
         종목 코드 반환
@@ -375,6 +392,17 @@ class Kiwoom(QAxWidget):
         code_list = self.get_code_list_by_market("10")
         print(f"코스닥 갯수: {len(code_list)}")
 
+        for idx, code in enumerate(code_list):
+            # 스크린 번호 데이터에 200개만 들어갈 수 있으므로 데이터 쌓이는 것을 방지하기 위해 스크린 번호 끊어서 요청
+            self.dynamicCall(
+                "DisconnectRealData(QString)", self.screen_calculation_stock
+            )
+            print(
+                f"{idx + 1} / {len(code_list)} : KOSDAQ Stock Code : {code} is updating..."
+            )
+
+            self.day_kiwoom_db(code=code)
+
     def day_kiwoom_db(self, code=None, date=None, sPrevNext="0"):
         self.dynamicCall("SetInputValue(QString, QString)", "종목코드", code)
         self.dynamicCall("SetInputValue(QString, QString)", "수정주가구분", "1")
@@ -389,3 +417,4 @@ class Kiwoom(QAxWidget):
             sPrevNext,
             self.screen_calculation_stock,
         )
+        self.calculator_event_loop.exec_()
