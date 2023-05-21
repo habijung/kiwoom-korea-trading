@@ -1,5 +1,6 @@
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
+from PyQt5.QtTest import *
 from config.error_code import *
 
 
@@ -365,7 +366,10 @@ class Kiwoom(QAxWidget):
                 0,
                 "종목코드",
             )
-            print(f"{code} 일봉 데이터 요청")
+            code = code.strip()
+
+            rows = self.dynamicCall("GetRepeatCnt(QString, QString)", sTrCode, sRQName)
+            print(f"{code} 일봉 데이터 요청 (일수: {rows})")
 
             # 이전 데이터가 있으면 계속 조회
             if sPrevNext == "2":
@@ -393,7 +397,7 @@ class Kiwoom(QAxWidget):
         print(f"코스닥 갯수: {len(code_list)}")
 
         for idx, code in enumerate(code_list):
-            # 스크린 번호 데이터에 200개만 들어갈 수 있으므로 데이터 쌓이는 것을 방지하기 위해 스크린 번호 끊어서 요청
+            # (Option) 스크린 번호 데이터에 200개만 들어갈 수 있으므로 데이터 쌓이는 것을 방지하기 위해 스크린 번호 끊어서 요청
             self.dynamicCall(
                 "DisconnectRealData(QString)", self.screen_calculation_stock
             )
@@ -404,6 +408,8 @@ class Kiwoom(QAxWidget):
             self.day_kiwoom_db(code=code)
 
     def day_kiwoom_db(self, code=None, date=None, sPrevNext="0"):
+        QTest.qWait(3600)  # 3.6초마다 1번씩만 요청 가능
+
         self.dynamicCall("SetInputValue(QString, QString)", "종목코드", code)
         self.dynamicCall("SetInputValue(QString, QString)", "수정주가구분", "1")
 
