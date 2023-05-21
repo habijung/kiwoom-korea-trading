@@ -11,8 +11,7 @@ class Kiwoom(QAxWidget):
 
         # Event Loop
         self.login_event_loop = None
-        self.detail_account_info_event_loop = None
-        self.detail_account_info_event_loop_2 = QEventLoop()
+        self.detail_account_info_event_loop = QEventLoop()
         ############################
 
         # Variables
@@ -20,6 +19,9 @@ class Kiwoom(QAxWidget):
         self.use_money = 0
         self.use_money_percent = 0.5
         self.account_stock_dict = {}
+
+        # Screen Number
+        self.screen_my_info = "2000"
 
         self.get_ocx_instance()
         self.event_slots()
@@ -69,11 +71,10 @@ class Kiwoom(QAxWidget):
             "예수금상세현황요청",
             "opw00001",
             "0",
-            "2000",
+            self.screen_my_info,
         )
 
-        # 요청 후 event loop를 실행해서 TR 요청 데이터가 올 때까지 대기
-        self.detail_account_info_event_loop = QEventLoop()
+        # 요청 후 event loop를 실행한 상태에서 TR 요청 데이터가 올 때까지 대기
         self.detail_account_info_event_loop.exec_()
 
     def detail_account_mystock(self, sPrevNext="0"):
@@ -88,10 +89,10 @@ class Kiwoom(QAxWidget):
             "계좌평가잔고내역요청",
             "opw00018",
             sPrevNext,
-            "2000",
+            self.screen_my_info,
         )
 
-        self.detail_account_info_event_loop_2.exec_()
+        self.detail_account_info_event_loop.exec_()
 
     def trdata_slot(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext):
         """
@@ -238,4 +239,4 @@ class Kiwoom(QAxWidget):
             if sPrevNext == "2":
                 self.detail_account_mystock(sPrevNext="2")
             else:
-                self.detail_account_info_event_loop_2.exit()
+                self.detail_account_info_event_loop.exit()
